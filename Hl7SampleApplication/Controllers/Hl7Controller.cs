@@ -1,30 +1,46 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Hl7SampleApplication.Model;
+using Hl7SampleApplication.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
-namespace Hl7SampleApplication.Controllers
+namespace Hl7SampleApplication.Controllers; 
+
+[Route("api/[controller]")]
+[ApiController]
+public class Hl7Controller : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class Hl7Controller : ControllerBase
+    private readonly ILogger<Hl7Controller> _logger;
+    private readonly IEncoder _encoder; 
+
+    public Hl7Controller(ILogger<Hl7Controller> logger, IEncoder encoder)
     {
-        private readonly ILogger<Hl7Controller> _logger;
+        _logger = logger;
+        _encoder = encoder;
+    }
 
-        public Hl7Controller(ILogger<Hl7Controller> logger)
+    [HttpPost(Name = "SendAppointment")]
+    public async Task<IActionResult> SendAppointment(string jsonText)
+    {
+        try
         {
-            _logger = logger;
+            var message = JsonSerializer.Deserialize<SuiMessage>(jsonText);
+
+            var result = _encoder.Encode(message);
+
+            //async database operations here... 
+            await Task.CompletedTask; 
+
+            return Ok(result); 
         }
-
-        [HttpPost(Name = "SendAppointment")]
-        public async Task<IActionResult> SendAppointment()
+        catch (JsonException ex) //just a sample - need to manage json exceptions separately
         {
-            var a = 1; 
-            
-            if (a == 1)
-                return NotFound(); 
-            
-            await Task.CompletedTask;
-
-            return Ok("some response..."); 
+            _logger.LogError(ex.ToString()); 
+            return BadRequest("Data could not be deserialized to json..."); 
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(500, "Some error occured, see the logs..."); 
         }
     }
 }
