@@ -11,11 +11,13 @@ public class Hl7Controller : ControllerBase
 {
     private readonly ILogger<Hl7Controller> _logger;
     private readonly IEncoder _encoder; 
+    private readonly IDecoder _decoder;
 
-    public Hl7Controller(ILogger<Hl7Controller> logger, IEncoder encoder)
+    public Hl7Controller(ILogger<Hl7Controller> logger, IEncoder encoder, IDecoder decoder)
     {
         _logger = logger;
         _encoder = encoder;
+        _decoder = decoder;
     }
 
     [HttpPost(Name = "SendAppointment")]
@@ -41,6 +43,25 @@ public class Hl7Controller : ControllerBase
         {
             _logger.LogError(ex.ToString());
             return StatusCode(500, "Some error occured, see the logs..."); 
+        }
+    }
+
+    [HttpPost(Name = "SendMedicalRecord")]
+    public async Task<IActionResult> SendMedicalRecord(string mdmText)
+    {
+        try
+        {
+            var result = _decoder.Decode(mdmText);
+
+            //async database operations here... 
+            await Task.CompletedTask;
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(500, "Some error occured, see the logs...");
         }
     }
 }
