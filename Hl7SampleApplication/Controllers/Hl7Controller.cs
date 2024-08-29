@@ -20,7 +20,8 @@ public class Hl7Controller : ControllerBase
         _decoder = decoder;
     }
 
-    [HttpPost(Name = "SendAppointment")]
+    [HttpPost]
+    [Route("[action]")]
     public async Task<IActionResult> SendAppointment(string jsonText)
     {
         try
@@ -46,7 +47,8 @@ public class Hl7Controller : ControllerBase
         }
     }
 
-    [HttpPost(Name = "SendMedicalRecord")]
+    [HttpPost]
+    [Route("[action]")]
     public async Task<IActionResult> SendMedicalRecord(string mdmText)
     {
         try

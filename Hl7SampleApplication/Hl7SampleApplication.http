@@ -1,6 +1,0 @@
-@Hl7SampleApplication_HostAddress = http://localhost:5068
-
-GET {{Hl7SampleApplication_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
